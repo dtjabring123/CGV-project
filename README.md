@@ -1,2 +1,2 @@
 # CGV-project
-Its not much but its honest work
+It's not much but it's honest work
