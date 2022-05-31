@@ -4,14 +4,13 @@ import {FirstPersonControls} from "./FirstPersonControls.js"
 import {PointerLockControls} from "./PointerLockControls.js";
 import {GLTFLoader} from "./GLTFLoader.js";
 import {CharacterControls} from './characterControls.js';
+import {Water} from './Water2.js';
 
 var scene, camera, renderer, controls;
-var diamond, ground; 
+var diamond, ground, water; 
 var directionalLight, ambientLight;
+var skybox;
 var model;
-
-var cam2;
-let iw, ih;
 
 var clock = new THREE.Clock();
 var characterControls;
@@ -35,23 +34,6 @@ function animate(){
 
     renderer.render(scene, camera);
 
-    // renderer.clearDepth();
-    // renderer.setScissorTest(true);
-    // renderer.setScissor(
-    //     window.innerWidth - iw - 16,
-    //     window.innerHeight - ih - 16,
-    //     iw,
-    //     ih
-    // );
-    // renderer.setViewport(
-    //     window.innerWidth - iw - 16,
-    //     window.innerHeight - ih - 16,
-    //     iw,
-    //     ih
-    // );
-
-    // renderer.render(scene, cam2);
-    // renderer.setScissorTest(false);
 }
 
 function getDiamond(){
@@ -151,16 +133,40 @@ function getBush(){
 }
 
 function getGround(q,w){
-    var texture = new THREE.TextureLoader().load(["512x_foliage_coarse01.png"])
+    const planeGeo = new THREE.PlaneGeometry(q,w, 1500, 1500);
 
-    var mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(q,w),
-        new THREE.MeshStandardMaterial({map: texture})
-    );
-    mesh.rotation.x = -Math.PI/2;
-    mesh.receiveShadow = true;
-    return mesh;
+    const mat = new THREE.MeshPhongMaterial();
+
+    const texture = new THREE.TextureLoader().load(["512x_foliage_coarse01.png"]);
+    mat.map = texture;
+
+    const displacementMap = new THREE.TextureLoader().load(["River.png"]);
+    mat.displacementMap = displacementMap;
+    mat.displacementScale = 12;
+
+    const plane = new THREE.Mesh(planeGeo, mat);
+    
+    plane.rotation.x = -Math.PI/2;
+    plane.receiveShadow = true;
+    return plane;
 }
+
+function getWater(q,w){
+    const waterGeo = new THREE.PlaneGeometry(q, w);
+    
+    const water = new Water(waterGeo, {
+        scale: 4,
+        flowspeed: 0.7,
+        reflectivity: 0.6,
+    });
+    
+    water.rotation.x = -Math.PI/2;
+    water.position.y = 0.7;
+    water.receiveShadow = true;
+
+    return water;
+}
+
 
 function init(){
     window.addEventListener(
@@ -169,18 +175,12 @@ function init(){
             camera.aspect = this.innerWidth/this.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(this.innerWidth, this.innerHeight);
-
-            iw = this.window.innerWidth/4;
-            ih = this.window.innerHeight/4;
-
-            cam2.aspect = iw/ih;
-            cam2.updateProjectionMatrix();
         }
     )
 
     scene = new THREE.Scene();
 
-    //scene.fog = new THREE.FogExp2(0xdddddd, 0.005);
+    // scene.fog = new THREE.FogExp2(0xdddddd, 0.005);
 
     //Renderer **************************************************************************************
     renderer = new THREE.WebGLRenderer({antialias:true});
@@ -195,30 +195,10 @@ function init(){
         0.1,
         1000
     );
-    camera.position.set(0,30,35);
-    camera.lookAt(0,0,-20);
 
-    // cam2 = new THREE.PerspectiveCamera(
-    //     90,
-    //     window.innerWidth/window.innerHeight,
-    //     0.01,
-    //     500
-    // );
-    // cam2.position.set(0,200,0);
-    // cam2.lookAt(0,0,0);
-
-    // cam2.name = "mapCamera";
-
-    // camera.add(cam2);
-
-    // scene.add(camera);
-
-    // const h = new THREE.CameraHelper( cam2 );
-    // scene.add( h );
-    
 
     //SkyBox **************************************************************************************
-    var skybox = new THREE.CubeTextureLoader().load([
+    skybox = new THREE.CubeTextureLoader().load([
     "posx.jpg",
     "negx.jpg",
     "posy.jpg",
@@ -229,13 +209,14 @@ function init(){
     scene.background = skybox;
 
     //Controls **************************************************************************************
+
     controls = new OrbitControls(camera, renderer.domElement);
 
     controls.enableDamping = true;
-    controls.minDistance = 30;
+    controls.minDistance = 0;
     controls.maxDistance = 45;
     controls.enablePan = false;
-    //controls.maxPolarAngle = Math.PI/2 - 0.05
+    controls.maxPolarAngle = Math.PI/2 - 0.05
 
     //Lighting **************************************************************************************
     ambientLight = new THREE.AmbientLight(0xffffff);
@@ -271,6 +252,7 @@ function init(){
                 object.castShadow = true;
         });
         model.scale.set(10, 10, 10);
+        model.position.z = 500;
         scene.add(model);
         const gltfAnimations = gltf.animations;
         const mixer = new THREE.AnimationMixer(model);
@@ -295,8 +277,11 @@ function init(){
     }, false);
 
     //Objects **************************************************************************************
-    ground = getGround(1200,1200);  //ground
+    ground = getGround(1200, 1200);  //ground
     scene.add(ground);
+
+    water = getWater(1200, 1200);
+    scene.add(water);
 
     diamond = getDiamond(); //tepmorary diamond
     diamond.position.set(0,3,0);
