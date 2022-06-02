@@ -6,11 +6,19 @@ import {GLTFLoader} from "./GLTFLoader.js";
 import {CharacterControls} from './characterControls.js';
 import {Water} from './Water2.js';
 
-var scene, camera, renderer, controls;
+var scene, camera, renderer, controls, cam2;
 var diamond, ground, water; 
-var directionalLight, ambientLight;
+var directionalLight, ambientLight, spotLight;
 var skybox;
-var model;
+var model, cube, cubeLight;
+
+var viewType = false; // used to change viewtype
+
+document.addEventListener('keydown', (event) => {
+    if (event.ctrlKey) {
+        viewType = !viewType; //variable changed when ctrl key is clicked
+    }
+}, false);
 
 var clock = new THREE.Clock();
 var characterControls;
@@ -25,14 +33,35 @@ function animate(){
     if (characterControls) {
         characterControls.update(mixerUpdateDelta, keysPressed);
     }
+    // if statement that changes view
+    if (viewType == false){
+        controls.maxPolarAngle = Math.PI/2 + 0.05;
+        controls.minPolarAngle = 0;
+        controls.minDistance = 30;
+        controls.maxDistance = 30.1;
+    }
+    else {
+        controls.maxPolarAngle = Math.PI;
+        controls.minPolarAngle = Math.PI/2 + 0.01;
+        controls.minDistance = 0;
+        controls.maxDistance = 0.1;
+    }
     controls.update();
 
     diamond.rotation.x += 0.02;
-    diamond.rotation.y -= 0.02;
+    diamond.rotation.y += 0.02;
     diamond.rotation.z += 0.02;
 
+    cube.rotation.y += 0.1;
 
+    renderer.setViewport(0,0,window.innerWidth,window.innerHeight); //Main camera view
+    renderer.setScissorTest(false);
     renderer.render(scene, camera);
+
+    renderer.setViewport(50,50,200,200); //Minimap camera view
+    renderer.setScissor(50,50,200,200);
+    renderer.setScissorTest(true);
+    renderer.render(scene, cam2);
 
 }
 
@@ -167,6 +196,29 @@ function getWater(q,w){
     return water;
 }
 
+function getCube(){
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshStandardMaterial({
+        color: 0xfda50f,
+        emissive: 0xfda50f,
+        emissiveIntensity: 10
+    });
+    const cube = new THREE.Mesh(geometry, material);
+
+    return cube;
+}
+
+function getLight(){
+    const ironMan = new THREE.PointLight(0xfda50f);
+    ironMan.intensity = 1;
+    ironMan.distance = 100;
+    ironMan.decay = 2;
+    ironMan.castShadow = true;
+
+    return ironMan;
+}
+
+
 
 function init(){
     window.addEventListener(
@@ -196,7 +248,15 @@ function init(){
         1000
     );
 
+    cam2 = new THREE.PerspectiveCamera(
+        60, window.innerHeight/window.innerHeight,
+        0.1,
+        1000
+    );
+    cam2.position.set(0,1000,0);
+    cam2.lookAt(0,0,0);
 
+    
     //SkyBox **************************************************************************************
     skybox = new THREE.CubeTextureLoader().load([
     "posx.jpg",
@@ -213,18 +273,16 @@ function init(){
     controls = new OrbitControls(camera, renderer.domElement);
 
     controls.enableDamping = true;
-    controls.minDistance = 0;
-    controls.maxDistance = 45;
     controls.enablePan = false;
-    controls.maxPolarAngle = Math.PI/2 - 0.05
+
 
     //Lighting **************************************************************************************
-    ambientLight = new THREE.AmbientLight(0xffffff);
+    ambientLight = new THREE.AmbientLight(0xeeeeee);
     ambientLight.intensity = 0.1;
     scene.add(ambientLight);
 
     directionalLight = new THREE.DirectionalLight(0xffffff);
-    directionalLight.intensity = 0.7;
+    directionalLight.intensity = 0.2;
     directionalLight.position.set(5,200,5);
     directionalLight.castShadow = true;
 
@@ -241,6 +299,13 @@ function init(){
 
     scene.add(directionalLight);
     
+    spotLight = new THREE.SpotLight(0xffffff); // spot light pointing at diamond
+    spotLight.position.set(0,100,0);
+    spotLight.intensity = 1;
+    spotLight.angle = Math.PI/6;
+
+    scene.add(spotLight);
+    
     //Player ************************************************************************************
 
     // MODEL WITH ANIMATIONS
@@ -251,9 +316,22 @@ function init(){
             if (object.isMesh)
                 object.castShadow = true;
         });
+        
+        cube = getCube(); //cube and light added to model using hierachial modelling
+        cubeLight = getLight();
+        cube.add(cubeLight);
+
+        cube.scale.set(0.2,0.2,0.2);
+        cube.rotation.x = Math.PI/4;
+        cube.rotation.z = Math.PI/4;
+        cube.position.y = model.position.y + 1.85;
+        
+        model.add(cube);
+        
         model.scale.set(10, 10, 10);
         model.position.z = 500;
         scene.add(model);
+
         const gltfAnimations = gltf.animations;
         const mixer = new THREE.AnimationMixer(model);
         const animationsMap = new Map();
@@ -280,7 +358,7 @@ function init(){
     ground = getGround(1200, 1200);  //ground
     scene.add(ground);
 
-    water = getWater(1200, 1200);
+    water = getWater(1200, 1200); //water
     scene.add(water);
 
     diamond = getDiamond(); //tepmorary diamond

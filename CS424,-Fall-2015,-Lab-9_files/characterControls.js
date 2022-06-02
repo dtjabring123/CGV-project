@@ -79,7 +79,7 @@ export class CharacterControls {
         this.camera.position.z += moveZ;
         // update camera target
         this.cameraTarget.x = this.model.position.x;
-        this.cameraTarget.y = this.model.position.y + 1;
+        this.cameraTarget.y = this.model.position.y + 19;
         this.cameraTarget.z = this.model.position.z;
         this.orbitControl.target = this.cameraTarget;
     }
