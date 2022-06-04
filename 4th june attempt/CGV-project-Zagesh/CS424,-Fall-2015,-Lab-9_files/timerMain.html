@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="styles.css" />
+<title>Credits</title>
+</head>
+<body>
+    <script src="main (2).js" type="module"></script>
+    <button id = pauseButton style="font-size:30px;cursor:pointer;position:absolute;background:#124429" onclick="openNav()">&#9776;</button>
+    <div id="myNav" class="overlay">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+      <div class="overlay-content">
+        <a href="forest.html">Restart Level</a>
+        <a href="menu.html">Restart Game</a>
+        <a href="menu.html">Exit to Title</a>
+        <a href="credits.html">Exit to Desktop</a>
+      </div>
+    </div>
+
+    
+    
+    <script>
+    function openNav() {
+      document.getElementById("myNav").style.width = "100%";
+    }
+    
+    function closeNav() {
+      document.getElementById("myNav").style.width = "0%";
+    }
+    </script>
+  </body>
+</html>
