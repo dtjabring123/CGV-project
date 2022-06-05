@@ -14,6 +14,32 @@ var model, cube, cubeLight;
 
 var viewType = false; // used to change viewtype
 
+//for the maze 
+//for the maze 
+const bsize = 5;
+const tombWallTexture = new THREE.MeshLambertMaterial({color: "rgb(34,139,34)"});
+const tombWall = new THREE.BoxBufferGeometry(bsize,10,bsize);
+
+var amaze = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+    [1,0,1,1,1,1,0,0,0,1,0,0,0,0,0,0,1],
+    [1,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,1,0,0,0,1,1,1,1,0,1],
+    [1,0,0,1,1,1,0,1,1,1,1,1,0,0,0,0,1],
+    [1,1,1,1,1,1,0,0,0,0,0,1,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
+    [1,0,0,1,0,1,1,1,1,0,0,1,0,1,1,1,1],
+    [1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ];
+
+
+
+
 document.addEventListener('keydown', (event) => {
     if (event.ctrlKey) {
         viewType = !viewType; //variable changed when ctrl key is clicked
@@ -178,6 +204,27 @@ function getGround(q,w){
     plane.rotation.x = -Math.PI/2;
     plane.receiveShadow = true;
     return plane;
+}
+
+//maze
+function makeWall(){
+    var wall = new THREE.Mesh(tombWall,tombWallTexture);
+    return wall;
+}
+  
+function getMaze(){
+    var maze = new THREE.Object3D();
+    for(let r=0;r<14;r++){
+      for(let c=0;c<17;c++){
+        if(amaze[r][c]==1){
+          var wall = new makeWall();
+          wall.position.set(r*5,5,c*5);
+          maze.add(wall);
+        }
+      }
+    }
+    //maze.add(wall);
+    return maze;
 }
 
 function getWater(q,w){
@@ -364,6 +411,15 @@ function init(){
     diamond = getDiamond(); //tepmorary diamond
     diamond.position.set(0,3,0);
     scene.add(diamond);
+
+    //maze 
+    let maze = getMaze();
+    maze.scale.set(10,10,10);
+
+    //positive x is right 
+    //negative z is up 
+    maze.position.set(-300,0,-400); //scale and move the maze
+    scene.add(maze);
 
     //outside walls*************************************************************************
     // for (var i = -500; i <= 500; i=i+25){ //trees
