@@ -5,6 +5,8 @@ import {PointerLockControls} from "./PointerLockControls.js";
 import {GLTFLoader} from "./GLTFLoader.js";
 import {CharacterControls} from './characterControls.js';
 import {Water} from './Water2.js';
+import {Sky} from './Sky.js';
+import { GUI } from './lil-gui.module.min.js';
 
 var scene, camera, renderer, controls, cam2;
 var diamond, ground, water; 
@@ -12,7 +14,44 @@ var directionalLight, ambientLight, spotLight;
 var skybox;
 var model, cube, cubeLight;
 
+var clock = new THREE.Clock();
+var clock1 = new THREE.Clock();
+var timeElapsed;
+var characterControls;
+const keysPressed = {};
+
 var viewType = false; // used to change viewtype
+
+var uniforms;
+let sky, sun;
+var phi;
+var theta = 0;
+
+function initSky() {
+
+    // Add Sky
+    sky = new Sky();
+    sky.scale.setScalar( 450000 );
+    scene.add( sky );
+
+    sun = new THREE.Vector3();
+
+    
+    uniforms = sky.material.uniforms;
+    uniforms[ 'turbidity' ].value = 1;
+    uniforms[ 'rayleigh' ].value = 0.5;
+    uniforms[ 'mieCoefficient' ].value = 0.1;
+    uniforms[ 'mieDirectionalG' ].value = 1;
+
+    
+
+    
+
+    renderer.toneMappingExposure = 0.1;
+    renderer.render( scene, camera );
+
+
+}
 
 //for the maze 
 //for the maze 
@@ -46,14 +85,19 @@ document.addEventListener('keydown', (event) => {
     }
 }, false);
 
-var clock = new THREE.Clock();
-var characterControls;
-const keysPressed = {};
 
 
 function animate(){
 
     requestAnimationFrame(animate);
+
+    timeElapsed = clock1.getElapsedTime();
+    phi = timeElapsed * 0.1 * Math.PI - Math.PI/2;
+
+    sun.setFromSphericalCoords( 1, phi, theta );
+
+    directionalLight.position.setFromSphericalCoords(1, phi, theta);
+    uniforms[ 'sunPosition' ].value.copy( sun );
 
     let mixerUpdateDelta = clock.getDelta();
     if (characterControls) {
@@ -61,14 +105,14 @@ function animate(){
     }
     // if statement that changes view
     if (viewType == false){
-        controls.maxPolarAngle = Math.PI/2 + 0.05;
-        controls.minPolarAngle = 0;
+        // controls.maxPolarAngle = Math.PI/2 + 0.05;
+        // controls.minPolarAngle = 0;
         controls.minDistance = 30;
         controls.maxDistance = 30.1;
     }
     else {
-        controls.maxPolarAngle = Math.PI;
-        controls.minPolarAngle = Math.PI/2 + 0.01;
+        // controls.maxPolarAngle = Math.PI;
+        // controls.minPolarAngle = Math.PI/2 + 0.01;
         controls.minDistance = 0;
         controls.maxDistance = 0.1;
     }
@@ -79,6 +123,7 @@ function animate(){
     diamond.rotation.z += 0.02;
 
     cube.rotation.y += 0.1;
+
 
     renderer.setViewport(0,0,window.innerWidth,window.innerHeight); //Main camera view
     renderer.setScissorTest(false);
@@ -305,16 +350,7 @@ function init(){
 
     
     //SkyBox **************************************************************************************
-    skybox = new THREE.CubeTextureLoader().load([
-    "posx.jpg",
-    "negx.jpg",
-    "posy.jpg",
-    "negy.jpg",
-    "posz.jpg",
-    "negz.jpg"]);
-
-    scene.background = skybox;
-
+    initSky();
     //Controls **************************************************************************************
 
     controls = new OrbitControls(camera, renderer.domElement);
@@ -330,7 +366,9 @@ function init(){
 
     directionalLight = new THREE.DirectionalLight(0xffffff);
     directionalLight.intensity = 0.2;
-    directionalLight.position.set(5,200,5);
+
+
+    directionalLight.lookAt(0,0,0);
     directionalLight.castShadow = true;
 
     var d = 1000;
@@ -413,249 +451,15 @@ function init(){
     scene.add(diamond);
 
     //maze 
-    let maze = getMaze();
-    maze.scale.set(10,10,10);
+    // let maze = getMaze();
+    // maze.scale.set(10,10,10);
 
     //positive x is right 
     //negative z is up 
-    maze.position.set(-300,0,-400); //scale and move the maze
-    scene.add(maze);
+    // maze.position.set(-300,0,-400); //scale and move the maze
+    // scene.add(maze);
 
-    //outside walls*************************************************************************
-    // for (var i = -500; i <= 500; i=i+25){ //trees
-    //     var treeB = getTree();
-    //     if (!(i >= -25 && i <= 25)){
-    //         treeB.position.set(i, 75, 500);
-    //         scene.add(treeB);
-    //     }
-
-
-    //     var treeT = getTree();
-    //     treeT.position.set(i, 75, -500);
-    //     scene.add(treeT);
-
-    //     var treeR = getTree();
-    //     treeR.position.set(500, 75, i);
-    //     treeR.rotation.y = Math.PI/2;
-    //     scene.add(treeR);
-
-    //     var treeL = getTree();
-    //     treeL.position.set(-500, 75, i);
-    //     treeL.rotation.y = Math.PI/2;
-    //     scene.add(treeL);
-    // }
     
-    // //inside walls*************************************************************************
-    // for (var i = -447.369; i <= 447.369; i=i+25){ //treeBs
-    //     var treeB = getTree();
-    //     treeB.position.set(i, 75, 447.369);
-    //     scene.add(treeB);
-
-    //     var treeA = getTree();
-    //     if (!(i >= -236 && i <= -185)){
-    //         treeA.position.set(i, 75, -447.369);
-    //         scene.add(treeA);
-    //     }
-
-    //     var treeR = getTree();
-    //     treeR.position.set(447.369, 75, i);
-    //     treeR.rotation.y = Math.PI/2;
-    //     scene.add(treeR);
-
-    //     var treeL = getTree();
-    //     if (!(i >= 289 && i <= 343)){
-    //         treeL.position.set(-447.369, 75, i);
-    //         treeL.rotation.y = Math.PI/2;
-    //         scene.add(treeL);
-    //     }
-    // }
-
-    // for (var i = -394.738; i <= 394.738; i=i+25){ //treeBs
-    //     var treeB = getTree();
-    //     if (!(i >= 230 && i <= 290)){
-    //         treeB.position.set(i, 75, 394.738);
-    //         scene.add(treeB);
-    //     }
-
-    //     var treeA = getTree();
-    //     if (!(i >= 78 && i <= 132)){
-    //         treeA.position.set(i, 75, -394.738);
-    //         scene.add(treeA);
-    //     }
-        
-    //     var treeR = getTree();
-    //     treeR.position.set(394.738, 75, i);
-    //     treeR.rotation.y = Math.PI/2;
-    //     scene.add(treeR);
-
-    //     var treeL = getTree();
-    //     treeL.position.set(-394.738, 75, i);
-    //     treeL.rotation.y = Math.PI/2;
-    //     scene.add(treeL);
-    // }
-
-    // for (var i = -342.107; i <= 342.107; i=i+25){ //treeBs
-    //     var treeB = getTree();
-    //     treeB.position.set(i, 75, 342.107);
-    //     scene.add(treeB);
-
-    //     var treeA = getTree();
-    //     treeA.position.set(i, 75, -342.107);
-    //     scene.add(treeA);
-
-    //     var treeR = getTree();
-    //     if (!(i >= 26 && i <= 79)){
-    //         treeR.position.set(342.107, 75, i);
-    //         treeR.rotation.y = Math.PI/2;
-    //         scene.add(treeR);
-    //     }
-        
-    //     var treeL = getTree();
-    //     if (!(i >= 26 && i <= 79)){
-    //         treeL.position.set(-342.107, 75, i);
-    //         treeL.rotation.y = Math.PI/2;
-    //         scene.add(treeL);
-    //     }
-    // }
-
-    // for (var i = -289.476; i <= 289.476; i=i+25){ //treeBs
-    //     var treeB = getTree();
-    //     if (!(i >= 184 && i <= 237)){
-    //         treeB.position.set(i, 75, 289.476);
-    //         scene.add(treeB);
-    //     }
-
-    //     var treeA = getTree();
-    //     if (!(i >= -184 && i <= -132) || (i >= 26 && i <= 79)){
-    //         treeA.position.set(i, 75, -289.476);
-    //         scene.add(treeA);
-    //     }
-
-    //     var treeR = getTree();
-    //     treeR.position.set(289.476, 75, i);
-    //     treeR.rotation.y = Math.PI/2;
-    //     scene.add(treeR);
-
-    //     var treeL = getTree();
-    //     treeL.position.set(-289.476, 75, i);
-    //     treeL.rotation.y = Math.PI/2;
-    //     scene.add(treeL);
-    // }
-
-    // for (var i = -236.845; i <= 236.845; i=i+25){ //treeBs
-    //     var treeB = getTree();
-    //     if (!(i >= -26 && i <= 27)){
-    //         treeB.position.set(i, 75, 236.845);
-    //         scene.add(treeB);
-    //     }
-
-    //     var treeA = getTree();
-    //     treeA.position.set(i, 75, -236.845);
-    //     scene.add(treeA);
-
-    //     var treeR = getTree();
-    //     treeR.position.set(236.845, 75, i);
-    //     treeR.rotation.y = Math.PI/2;
-    //     scene.add(treeR);
-
-    //     var treeL = getTree();
-    //     treeL.position.set(-236.845, 75, i);
-    //     treeL.rotation.y = Math.PI/2;
-    //     scene.add(treeL);
-    // }
-
-    // for (var i = -184.214; i <= 184.214; i=i+25){ //treeBs
-    //     var treeB = getTree();
-    //     treeB.position.set(i, 75, 184.214);
-    //     scene.add(treeB);
-
-    //     var treeA = getTree();
-    //     if (!(i >= -78 && i <= -26)){
-    //         treeA.position.set(i, 75, -184.214);
-    //         scene.add(treeA);
-    //     }
-
-    //     var treeR = getTree();
-    //     if (!(i >= 26 && i <= 79)){
-    //         treeR.position.set(184.214, 75, i);
-    //         treeR.rotation.y = Math.PI/2;
-    //         scene.add(treeR);
-    //     }
-
-    //     var treeL = getTree();
-    //     treeL.position.set(-184.214, 75, i);
-    //     treeL.rotation.y = Math.PI/2;
-    //     scene.add(treeL);
-    // }
-
-    // for (var i = -131.583; i <= 131.583; i=i+25){ //treeBs
-    //     var treeB = getTree();
-    //     if (!(i >= -50 && i <= 27)){
-    //         treeB.position.set(i, 75, 131.583);
-    //         scene.add(treeB);
-    //     }
-        
-    //     var treeA = getTree();
-    //     treeA.position.set(i, 75, -131.583);
-    //     scene.add(treeA);
-
-    //     var treeR = getTree();
-    //     treeR.position.set(131.583, 75, i);
-    //     treeR.rotation.y = Math.PI/2;
-    //     scene.add(treeR);
-
-    //     var treeL = getTree();
-    //     treeL.position.set(-131.583, 75, i);
-    //     treeL.rotation.y = Math.PI/2;
-    //     scene.add(treeL);
-    // }
-
-    var bush1 = getBush();
-    bush1.position.set(-421.05, 50, 250);
-    scene.add(bush1);
-
-    var bush2 = getBush();
-    bush2.position.set(-315.79, 50, 200);
-    scene.add(bush2);
-
-    var bush3 = getBush();
-    bush3.position.set(368.42, 50, -200);
-    scene.add(bush3);
-
-    var bush4 = getBush();
-    bush4.position.set(-130, 50, -421.05);
-    bush4.rotation.y = Math.PI/2;
-    scene.add(bush4);
-
-    var bush5 = getBush();
-    bush5.position.set(-120, 50, -315.79);
-    bush5.rotation.y = Math.PI/2;
-    scene.add(bush5);
-
-    var bush6 = getBush();
-    bush6.position.set(0, 50, -157.89);
-    bush6.rotation.y = Math.PI/2;
-    scene.add(bush6);
-
-    var bush7 = getBush();
-    bush7.position.set(0, 50, -263.16);
-    bush7.rotation.y = Math.PI/2;
-    scene.add(bush7);
-
-    var bush8 = getBush();
-    bush8.position.set(-51, 50, 157.89);
-    bush8.rotation.y = Math.PI/2;
-    scene.add(bush8);
-
-    var bush9 = getBush();
-    bush9.position.set(38, 50, 263.16);
-    bush9.rotation.y = Math.PI/2;
-    scene.add(bush9);
-
-    var bush10 = getBush();
-    bush10.position.set(300, 50, 368.42);
-    bush10.rotation.y = Math.PI/2;
-    scene.add(bush10);
 
     animate();
 }
