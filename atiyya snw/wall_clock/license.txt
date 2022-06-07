@@ -1,0 +1,11 @@
+Model Information:
+* title:	Wall Clock
+* source:	https://sketchfab.com/3d-models/wall-clock-2e964ac0242e4b1789adfd9549c653dc
+* author:	FelipeMSX (https://sketchfab.com/felipeprodev)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Wall Clock" (https://sketchfab.com/3d-models/wall-clock-2e964ac0242e4b1789adfd9549c653dc) by FelipeMSX (https://sketchfab.com/felipeprodev) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
