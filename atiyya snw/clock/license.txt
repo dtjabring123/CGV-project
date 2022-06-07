@@ -1,0 +1,11 @@
+Model Information:
+* title:	Alarm-clock VITYAZ(Будильник Витязь)
+* source:	https://sketchfab.com/3d-models/alarm-clock-vityaz-215a41d8b6d44ecdbd70cc9680c0f585
+* author:	ArtemMedvedev (https://sketchfab.com/medvedprived18)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Alarm-clock VITYAZ(Будильник Витязь)" (https://sketchfab.com/3d-models/alarm-clock-vityaz-215a41d8b6d44ecdbd70cc9680c0f585) by ArtemMedvedev (https://sketchfab.com/medvedprived18) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
