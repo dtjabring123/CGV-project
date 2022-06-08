@@ -1,0 +1,119 @@
+
+body {
+	margin: 0;
+	background-color: rgba(83, 202, 207, 1);
+	overflow: hidden !important;
+}
+
+body::after {
+	content: "";
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 80vh;
+	background: linear-gradient(
+		to bottom,
+		rgba(83, 202, 207, 1) 61%,
+		rgba(83, 202, 207, 0.54) 79%,
+		rgba(83, 202, 207, 0) 100%,
+	);
+
+	
+	z-index: 1;
+}
+button {
+    width: 100px;
+    height: 50px;
+    line-height: 50px;
+    font-weight: bold;
+    padding: 10 40px;
+    background: #124429;
+    border-radius : 4px;
+    border-color: #0c2d2c;
+    font-family: 'Macondo', cursive;
+    font-size: 20px;
+    color         : #e4d9c9;
+    box-shadow    : 0 5px #092215;
+  }
+  
+  button:hover {
+    background: #154f30;
+  }
+.stars {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	background-color: rgb(255, 255, 255);
+	z-index: 2;
+}
+#scroller {
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 350%;
+	text-align: justify;
+	overflow: hidden;
+	height: 50em;
+	width: 20em;
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	margin-left: -10em;
+	z-index: 0;
+	transform: perspective(350px) rotateX(15deg);
+	transform-origin: 50% 100%;
+}
+
+#scroller::after {
+	position: absolute;
+	content: "";
+	bottom: 60%;
+	left: 0;
+	right: 0;
+	top: 0;
+}
+
+#content {
+	position: absolute;
+	top: 100%;
+	animation: scoller 100s linear 1s;
+}
+
+@keyframes scoller {
+	0% {
+		top: 100%;
+	}
+	100% {
+		top: -100%;
+	}
+}
+
+p {
+    color: #391930;
+
+	font-family: 'Macondo', cursive;
+	
+}
+
+
+#title,
+#subtitle {
+	text-align: center;
+	line-height: 1.5rem;
+	font-family: 'Macondo', cursive;
+	font-size: 100px;
+	/*color  : #124429;*/
+	color: #408e50;
+	font-weight: bold;
+	position: absolute;
+	z-index     : 3;
+	width: 100%;
+	text-align  : center;
+	text-shadow:20p 20px#0c2d2c ;
+  
+}
+
+#subtitle {
+	text-transform: uppercase;
+	font-size: 3.5rem;
+}
